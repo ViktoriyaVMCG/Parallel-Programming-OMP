@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <omp.h>
+
+#define MAX_THREADS 4
+
+static long numsteps = 1000000000;
+double step;
+int main ()
+{
+	int i,j;
+	double pi, totalsum = 0.0, starttime, runtime, sum[MAX_THREADS];
+	step = 1.0/(double) numsteps;
+
+ for (i=1;i<=MAX_THREADS ;i++) {
+ omp_set_num_threads(i);
+ totalsum=0.0;
+ starttime = omp_get_wtime();
+
+  #pragma omp parallel
+ {
+ int j;
+	 int id = omp_get_thread_num();
+	 int numthreads = omp_get_num_threads();
+	 double x;
+	 sum[id] = 0.0;
+
+ if (id == 0) 
+ printf(" numthreads = %d",numthreads);
+
+	for (j=id;j< numsteps; j+=numthreads){
+	x = (j+0.5)*step;
+	sum[id] = sum[id] + 4.0/(1.0+x*x);
+	}
+ }
+	for(totalsum = 0.0, j=0;j<i;j++)
+	totalsum += sum[j];
+
+ pi = step * totalsum;
+ printf("\n pi is %f , %d threads \n",pi,i);
+ }
+} 
