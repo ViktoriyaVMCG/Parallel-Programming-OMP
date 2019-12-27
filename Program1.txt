@@ -1,0 +1,53 @@
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define N 32
+
+int main (int argc, char *argv[]){
+
+	int nthreads, tid, i, j;
+	int a[N];
+	int temp;
+	float k;	
+	double start_time, run_time; 	
+
+	
+	for (i=1; i < N; i++){
+	a[i]=a[i-1]+i;
+	}
+
+	start_time = omp_get_wtime();
+
+#pragma omp parallel shared(a,nthreads) private(i,j,tid,temp)
+{
+	tid = omp_get_thread_num();
+	{
+		nthreads = omp_get_num_threads();
+		printf("Number of threads = %d\n", nthreads);	
+	}
+	
+
+	for(j=0; j<=log2((N)-1); j++)
+	{
+	temp = 2;
+	for (k=0; k<=j; k++)
+		temp = temp * 2; 
+		
+		if(i-temp>=0)
+			a[i] = a[i] + a[(int) (i-temp)];		
+	}
+
+	for(i=0; i<N; i++){		
+		printf("Thread %d: a[%d]=%d\n", tid,j,a[i]);
+	}
+} 	
+
+	for (i=0; i < N/2; i++){
+	printf("Threads %d \n", i);
+	}
+
+	run_time = omp_get_wtime() - start_time;
+	printf("\n %f seconds %d threads \n", i, run_time, j);
+}
